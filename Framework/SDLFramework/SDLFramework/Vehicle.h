@@ -13,6 +13,7 @@
 #include "MovingEntity.h"
 #include "Vector2D.h"
 #include "FWApplication.h"
+#include "StateMachine.h"
 
 #include <vector>
 #include <list>
@@ -45,7 +46,12 @@ private:
 	Vehicle& operator=(const Vehicle&);
 
 	std::string _texture;
+	StateMachine<Vehicle>* stateMachine;
 
+	double viewDistance = 150;
+
+	friend class VehicleWanderState;
+	friend class VehicleEvadeState;
 
 public:
 
@@ -75,6 +81,7 @@ public:
 
 	double       TimeElapsed()const { return m_dTimeElapsed; }
 
+	StateMachine<Vehicle>*	GetFSM()const { return stateMachine; }
 };
 
 

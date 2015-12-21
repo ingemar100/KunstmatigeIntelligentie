@@ -16,7 +16,6 @@
 #include <list>
 
 #include "Vector2D.h"
-#include "constants.h"
 #include "Path.h"
 
 
@@ -72,8 +71,7 @@ private:
 	Vector2D    m_vSteeringForce;
 
 	//these can be used to keep track of friends, pursuers, or prey
-	Vehicle*     m_pTargetAgent1;
-	Vehicle*     m_pTargetAgent2;
+	Vehicle*     m_pTargetAgent;
 
 	//the current target
 	Vector2D    m_vTarget;
@@ -187,10 +185,10 @@ public:
 	Vector2D Calculate();
 
 
-	void      SetTarget(const Vector2D t) { m_vTarget = t; }
+	void SetTarget(const Vector2D t) { m_vTarget = t; }
 
-	void      SetTargetAgent1(Vehicle* Agent) { m_pTargetAgent1 = Agent; }
-	void      SetTargetAgent2(Vehicle* Agent) { m_pTargetAgent2 = Agent; }
+	void SetTargetAgent(Vehicle* Agent) { m_pTargetAgent = Agent; }
+	Vehicle* getTargetAgent() { return m_pTargetAgent; }
 
 
 	Vector2D Force()const { return m_vSteeringForce; }
@@ -200,8 +198,8 @@ public:
 	void SeekOn() { m_iFlags |= seek; }
 	void ArriveOn() { m_iFlags |= arrive; }
 	void WanderOn() { m_iFlags |= wander; }
-	void PursuitOn(Vehicle* v) { m_iFlags |= pursuit; m_pTargetAgent1 = v; }
-	void EvadeOn(Vehicle* v) { m_iFlags |= evade; m_pTargetAgent1 = v; }
+	void PursuitOn() { m_iFlags |= pursuit; }
+	void EvadeOn() { m_iFlags |= evade; }
 
 	void FleeOff() { if (On(flee))   m_iFlags ^= flee; }
 	void SeekOff() { if (On(seek))   m_iFlags ^= seek; }

@@ -20,12 +20,12 @@ int main(int args[])
 	application->SetTargetFPS(60);
 	application->SetColor(Color(255, 10, 40, 255));
 
-
-	GameWorld* world = new GameWorld(800,600);
+	GameWorld* world = new GameWorld(1000,800);
 	
 	double dt = 0;
 	Uint32 lastTime = SDL_GetTicks();
 
+	srand(time(NULL));
 	//while (true){}
 	while (application->IsRunning())
 	{

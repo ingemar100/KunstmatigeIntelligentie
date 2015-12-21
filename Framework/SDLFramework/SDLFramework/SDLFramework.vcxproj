@@ -91,6 +91,7 @@
     <ClCompile Include="SteeringBehaviors.cpp" />
     <ClCompile Include="Vector2D.cpp" />
     <ClCompile Include="Vehicle.cpp" />
+    <ClCompile Include="VehicleOwnedStates.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SDL2.dll" />
@@ -99,18 +100,20 @@
     <ClInclude Include="BaseGameEntity.h" />
     <ClInclude Include="C2DMatrix.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="constants.h" />
     <ClInclude Include="FWApplication.h" />
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="IGameObject.h" />
     <ClInclude Include="MovingEntity.h" />
     <ClInclude Include="Path.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="StateMachine.h" />
     <ClInclude Include="SteeringBehaviors.h" />
     <ClInclude Include="Transformations.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vector2D.h" />
     <ClInclude Include="Vehicle.h" />
+    <ClInclude Include="VehicleOwnedStates.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,7 @@
 #include "GameWorld.h"
 #include "Vehicle.h"
 #include "SteeringBehaviors.h"
+#include "VehicleOwnedStates.h"
 
 #include <list>
 using std::list;
@@ -30,9 +31,7 @@ GameWorld::GameWorld(int cx, int cy) :
 		Pi, //max turn rate
 		3,
 		"rabbit-3.png");        //scale)
-	hare->Steering()->WanderOn();
-	hare->SetMaxSpeed(150);
-	m_Vehicles.push_back(hare);
+	hare->GetFSM()->SetCurrentState(VehicleWanderState::Instance());
 
 	//determine a random starting position
 	SpawnPos = Vector2D(cx / 2.0 + RandomClamped()*cx / 2.0,
@@ -47,10 +46,15 @@ GameWorld::GameWorld(int cx, int cy) :
 		50,             //max velocity
 		Pi, //max turn rate
 		3,
-		"lemmling_Cartoon_cow.png");        //scale
+		"cowfro.png");        //scale
 
-	cow->Steering()->PursuitOn(hare);
 
+
+	hare->Steering()->SetTargetAgent(cow);
+	cow->Steering()->SetTargetAgent(hare);
+	cow->GetFSM()->SetCurrentState(VehiclePursuitState::Instance());
+
+	m_Vehicles.push_back(hare);
 	m_Vehicles.push_back(cow);
 }
 
@@ -71,13 +75,6 @@ GameWorld::~GameWorld()
 //------------------------------------------------------------------------
 void GameWorld::Update(double time_elapsed)
 {
-
-	//create a smoother to smooth the framerate
-	const int SampleRate = 10;
-	static Smoother<double> FrameRateSmoother(SampleRate, 0.0);
-
-	m_dAvFrameTime = FrameRateSmoother.Update(time_elapsed);
-
 
 	//update the vehicles
 	for (unsigned int a = 0; a<m_Vehicles.size(); ++a)

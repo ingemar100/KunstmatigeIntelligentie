@@ -25,6 +25,7 @@ SteeringBehavior::SteeringBehavior(Vehicle* agent) :
 	m_dWanderRadius(WanderRad),
 	m_dWeightSeek(200),
 	m_dWeightFlee(200),
+	m_dWeightEvade(200),
 	m_dWeightArrive(200),
 	m_dWeightPursuit(200)
 
@@ -129,9 +130,9 @@ Vector2D SteeringBehavior::CalculatePrioritized()
 
 	if (On(evade))
 	{
-		assert(m_pTargetAgent1 && "Evade target not assigned");
+		assert(m_pTargetAgent && "Evade target not assigned");
 
-		force = Evade(m_pTargetAgent1) * m_dWeightEvade;
+		force = Evade(m_pTargetAgent) * m_dWeightEvade;
 
 		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
 	}
@@ -168,9 +169,9 @@ Vector2D SteeringBehavior::CalculatePrioritized()
 
 	if (On(pursuit))
 	{
-		assert(m_pTargetAgent1 && "pursuit target not assigned");
+		assert(m_pTargetAgent && "pursuit target not assigned");
 
-		force = Pursuit(m_pTargetAgent1) * m_dWeightPursuit;
+		force = Pursuit(m_pTargetAgent) * m_dWeightPursuit;
 
 		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
 	}
@@ -298,7 +299,7 @@ Vector2D SteeringBehavior::Evade(const Vehicle* pursuer)
 
 	//uncomment the following two lines to have Evade only consider pursuers 
 	//within a 'threat range'
-	const double ThreatRange = 100.0;
+	const double ThreatRange = 200.0;
 	if (ToPursuer.LengthSq() > ThreatRange * ThreatRange) return Vector2D();
 
 	//the lookahead time is propotional to the distance between the pursuer

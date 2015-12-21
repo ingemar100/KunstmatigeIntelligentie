@@ -244,7 +244,7 @@ public:
 	//void AddOnEvent(std::function<void(SDL_Event*)> func);
 
 private:
-	FWApplication(int offsetX = 50, int offsetY = 50, int width = 800, int height = 600);
+	FWApplication(int offsetX = 50, int offsetY = 50, int width = 1000, int height = 800);
 	~FWApplication();
 	std::vector<IGameObject *> mGameObjects;
 	static FWApplication * mInstance;

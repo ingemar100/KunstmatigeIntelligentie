@@ -4,6 +4,7 @@
 #include "SteeringBehaviors.h"
 #include "Transformations.h"
 #include "GameWorld.h"
+#include "VehicleOwnedStates.h"
 
 using std::vector;
 using std::list;
@@ -38,6 +39,8 @@ Vehicle::Vehicle(GameWorld* world,
 	m_pSteering = new SteeringBehavior(this);
 
 	_texture = texture;
+
+	stateMachine = new StateMachine<Vehicle>(this);
 }
 
 
@@ -54,6 +57,8 @@ Vehicle::~Vehicle()
 //------------------------------------------------------------------------
 void Vehicle::Update(double time_elapsed)
 {
+	stateMachine->Update();
+
 	//update the time elapsed
 	m_dTimeElapsed = time_elapsed;
 
@@ -103,6 +108,16 @@ void Vehicle::Render()
 {
 	SDL_Texture* texture = FWApplication::GetInstance()->LoadTexture(_texture);
 	FWApplication::GetInstance()->DrawTexture(texture, m_vPos.x, m_vPos.y, 85, 93);
+
+	FWApplication::GetInstance()->SetColor(Color(0, 0, 0, 255));
+	if (stateMachine->isInState(*VehicleEvadeState::Instance())) {
+		FWApplication::GetInstance()->JustDrawText("Evade", 50, 50);
+	}
+	if (stateMachine->isInState(*VehicleWanderState::Instance())) {
+		FWApplication::GetInstance()->JustDrawText("Wander", 50, 50);
+	}
+
+	FWApplication::GetInstance()->SetColor(Color(255,255,255, 0));
 
 	FWApplication::GetInstance()->RemoveTexture(texture);
 
