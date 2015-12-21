@@ -82,6 +82,9 @@ public:
 	double       TimeElapsed()const { return m_dTimeElapsed; }
 
 	StateMachine<Vehicle>*	GetFSM()const { return stateMachine; }
+	double getViewDistance() {
+		return viewDistance;
+	}
 };
 
 

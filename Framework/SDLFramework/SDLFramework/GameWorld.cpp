@@ -31,31 +31,32 @@ GameWorld::GameWorld(int cx, int cy) :
 		Pi, //max turn rate
 		3,
 		"rabbit-3.png");        //scale)
+
+	int numCows = 5;
+	for (int i = 0; i < numCows; i++) {
+		//determine a random starting position
+		SpawnPos = Vector2D(cx / 2.0 + RandomClamped()*cx / 2.0,
+			cy / 2.0 + RandomClamped()*cy / 2.0);
+
+		Vehicle* cow = new Vehicle(this,
+			SpawnPos,                 //initial position
+			RandFloat()*TwoPi,        //start rotation
+			Vector2D(0, 0),            //velocity
+			1,          //mass
+			400,     //max force
+			50,             //max velocity
+			Pi, //max turn rate
+			30,//scale
+			"cowfro.png");        
+
+		cow->Steering()->FlockingOn();
+		cow->Steering()->SetTargetAgent(hare);
+		cow->GetFSM()->SetCurrentState(VehiclePursuitState::Instance());
+		m_Vehicles.push_back(cow);
+	}
+
 	hare->GetFSM()->SetCurrentState(VehicleWanderState::Instance());
-
-	//determine a random starting position
-	SpawnPos = Vector2D(cx / 2.0 + RandomClamped()*cx / 2.0,
-		cy / 2.0 + RandomClamped()*cy / 2.0);
-
-	Vehicle* cow = new Vehicle(this,
-		SpawnPos,                 //initial position
-		RandFloat()*TwoPi,        //start rotation
-		Vector2D(0, 0),            //velocity
-		1,          //mass
-		400,     //max force
-		50,             //max velocity
-		Pi, //max turn rate
-		3,
-		"cowfro.png");        //scale
-
-
-
-	hare->Steering()->SetTargetAgent(cow);
-	cow->Steering()->SetTargetAgent(hare);
-	cow->GetFSM()->SetCurrentState(VehiclePursuitState::Instance());
-
 	m_Vehicles.push_back(hare);
-	m_Vehicles.push_back(cow);
 }
 
 

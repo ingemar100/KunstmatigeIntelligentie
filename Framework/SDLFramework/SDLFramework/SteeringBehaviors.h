@@ -58,6 +58,7 @@ private:
 		wander = 0x00010,
 		pursuit = 0x00800,
 		evade = 0x01000,
+		flocking = 0x08000
 	};
 
 private:
@@ -97,6 +98,9 @@ private:
 	double        m_dWeightArrive;
 	double        m_dWeightPursuit;
 	double        m_dWeightEvade;
+	double        m_dWeightSeparation;
+	double        m_dWeightAlignment;
+	double        m_dWeightCohesion;
 
 	//how far the agent can 'see'
 	double        m_dViewDistance;
@@ -184,6 +188,14 @@ public:
 	//calculates and sums the steering forces from any active behaviors
 	Vector2D Calculate();
 
+	void TagNeighbors();
+
+	Vector2D Separation(const std::vector<Vehicle*>& neighbors);
+
+	Vector2D Alignment(const std::vector<Vehicle*>& neighbors);
+
+	Vector2D Cohesion(const std::vector<Vehicle*>& neighbors);
+
 
 	void SetTarget(const Vector2D t) { m_vTarget = t; }
 
@@ -200,6 +212,7 @@ public:
 	void WanderOn() { m_iFlags |= wander; }
 	void PursuitOn() { m_iFlags |= pursuit; }
 	void EvadeOn() { m_iFlags |= evade; }
+	void FlockingOn() { m_iFlags |= flocking; }
 
 	void FleeOff() { if (On(flee))   m_iFlags ^= flee; }
 	void SeekOff() { if (On(seek))   m_iFlags ^= seek; }
@@ -207,6 +220,7 @@ public:
 	void WanderOff() { if (On(wander)) m_iFlags ^= wander; }
 	void PursuitOff() { if (On(pursuit)) m_iFlags ^= pursuit; }
 	void EvadeOff() { if (On(evade)) m_iFlags ^= evade; }
+	void FlockingOff() { if (On(flocking)) m_iFlags ^= flocking; }
 
 	bool isFleeOn() { return On(flee); }
 	bool isSeekOn() { return On(seek); }
@@ -214,6 +228,7 @@ public:
 	bool isWanderOn() { return On(wander); }
 	bool isPursuitOn() { return On(pursuit); }
 	bool isEvadeOn() { return On(evade); }
+	bool isFlockingOn() { return On(flocking); }
 
 	double WanderJitter()const { return m_dWanderJitter; }
 	double WanderDistance()const { return m_dWanderDistance; }

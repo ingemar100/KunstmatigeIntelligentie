@@ -1,6 +1,7 @@
 #include "VehicleOwnedStates.h"
 #include "Vehicle.h"
 #include "SteeringBehaviors.h"
+#include "GameWorld.h"
 
 
 VehicleWanderState* VehicleWanderState::Instance()
@@ -20,9 +21,15 @@ void VehicleWanderState::Execute(Vehicle* vehicle)
 	//switch naar fleestate
 	const double ThreatRange = vehicle->viewDistance;
 
-	Vector2D pursuerDistance = vehicle->Steering()->getTargetAgent()->Pos() - vehicle->Pos();
-	if (pursuerDistance.LengthSq() < ThreatRange * ThreatRange) {
-		vehicle->GetFSM()->ChangeState(VehicleEvadeState::Instance());
+	for (auto threat : vehicle->World()->Agents()) {
+		if (threat != vehicle) {
+			Vector2D pursuerDistance = threat->Pos() - vehicle->Pos();
+			if (pursuerDistance.LengthSq() < ThreatRange * ThreatRange) {
+				vehicle->Steering()->SetTargetAgent(threat);
+				vehicle->GetFSM()->ChangeState(VehicleEvadeState::Instance());
+				return;
+			}
+		}
 	}
 }
 

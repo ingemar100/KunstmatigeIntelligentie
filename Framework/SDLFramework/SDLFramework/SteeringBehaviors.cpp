@@ -27,7 +27,10 @@ SteeringBehavior::SteeringBehavior(Vehicle* agent) :
 	m_dWeightFlee(200),
 	m_dWeightEvade(200),
 	m_dWeightArrive(200),
-	m_dWeightPursuit(200)
+	m_dWeightPursuit(200),
+	m_dWeightSeparation(10000),
+	m_dWeightAlignment(200),
+	m_dWeightCohesion(200)
 
 
 {
@@ -60,6 +63,11 @@ Vector2D SteeringBehavior::Calculate()
 {
 	//reset the steering force
 	m_vSteeringForce.Zero();
+	
+	if (On(flocking))
+	{
+		TagNeighbors();
+	}
 
 	//use space partitioning to calculate the neighbours of this vehicle
 	//if switched on. If not, use the standard tagging system
@@ -71,7 +79,6 @@ Vector2D SteeringBehavior::Calculate()
 
 	return m_vSteeringForce;
 }
-
 
 
 //--------------------- AccumulateForce ----------------------------------
@@ -141,6 +148,23 @@ Vector2D SteeringBehavior::CalculatePrioritized()
 	if (On(flee))
 	{
 		//force = Flee(m_pVehicle->World()->Crosshair()) * m_dWeightFlee;
+
+		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
+	}
+
+	if (On(flocking))
+	{
+		force = Separation(m_pVehicle->World()->Agents()) * m_dWeightSeparation;
+
+		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
+
+
+		force = Alignment(m_pVehicle->World()->Agents()) * m_dWeightAlignment;
+
+		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
+
+
+		force = Cohesion(m_pVehicle->World()->Agents()) * m_dWeightCohesion;
 
 		if (!AccumulateForce(m_vSteeringForce, force)) return m_vSteeringForce;
 	}
@@ -347,3 +371,93 @@ Vector2D SteeringBehavior::Wander()
 	return Target - m_pVehicle->Pos();
 }
 
+void SteeringBehavior::TagNeighbors()
+{
+	//iterate through all entities checking for range
+	for (auto curEntity : m_pVehicle->World()->Agents())
+	{
+		curEntity->UnTag();
+
+		Vector2D to = curEntity->Pos() - m_pVehicle->Pos();
+		//the bounding radius of the other is taken into account by adding it
+		//to the range
+		double range = m_pVehicle->getViewDistance() + curEntity->BRadius();
+		//if entity within range, tag for further consideration. (working in
+		//distance-squared space to avoid sqrts)
+		if ((curEntity != m_pVehicle) && curEntity != m_pTargetAgent && (to.LengthSq() < range*range))
+		{
+			curEntity->Tag();
+		}
+	}
+}
+
+Vector2D SteeringBehavior::Separation(const std::vector<Vehicle*>& neighbors)
+{
+	Vector2D SteeringForce;
+	for (int a = 0; a<neighbors.size(); ++a)
+	{
+		//make sure this agent isn't included in the calculations and that
+		//the agent being examined is close enough.
+		if ((neighbors[a] != m_pVehicle) && neighbors[a]->IsTagged())
+		{
+			Vector2D ToAgent = m_pVehicle->Pos() - neighbors[a]->Pos();
+			//scale the force inversely proportional to the agent's distance
+			//from its neighbor.
+			SteeringForce += Vec2DNormalize(ToAgent) / ToAgent.Length();
+		}
+	}
+	return SteeringForce;
+}
+
+Vector2D SteeringBehavior::Alignment(const std::vector<Vehicle*>& neighbors)
+{
+	//used to record the average heading of the neighbors
+	Vector2D AverageHeading;
+	//used to count the number of vehicles in the neighborhood
+	int NeighborCount = 0;
+		//iterate through all the tagged vehicles and sum their heading vectors
+		for (int a = 0; a<neighbors.size(); ++a)
+		{
+			//make sure *this* agent isn't included in the calculations and that
+			//the agent being examined is close enough
+			if ((neighbors[a] != m_pVehicle) && neighbors[a]->IsTagged())
+			{
+				AverageHeading += neighbors[a]->Heading();
+				++NeighborCount;
+			}
+		}
+	//if the neighborhood contained one or more vehicles, average their
+	//heading vectors.
+	if (NeighborCount > 0)
+	{
+		AverageHeading /= (double)NeighborCount;
+		AverageHeading -= m_pVehicle->Heading();
+	}
+	return AverageHeading;
+}
+
+Vector2D SteeringBehavior::Cohesion(const std::vector<Vehicle*>& neighbors)
+{
+	//first find the center of mass of all the agents
+	Vector2D CenterOfMass, SteeringForce;
+	int NeighborCount = 0;
+	//iterate through the neighbors and sum up all the position vectors
+	for (int a = 0; a<neighbors.size(); ++a)
+	{
+		//make sure *this* agent isn't included in the calculations and that
+		//the agent being examined is a neighbor
+		if ((neighbors[a] != m_pVehicle) && neighbors[a]->IsTagged())
+		{
+			CenterOfMass += neighbors[a]->Pos();
+			++NeighborCount;
+		}
+	}
+	if (NeighborCount > 0)
+	{
+		//the center of mass is the average of the sum of positions
+		CenterOfMass /= (double)NeighborCount;
+		//now seek toward that position
+		SteeringForce = Seek(CenterOfMass);
+	}
+	return SteeringForce;
+}
